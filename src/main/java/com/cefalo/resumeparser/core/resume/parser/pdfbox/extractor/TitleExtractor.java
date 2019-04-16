@@ -36,11 +36,13 @@ public class TitleExtractor implements Extractor {
       String probablyName = "";
       probablyName = firstNonEmptyLine(document, probablyName);
 
-      Optional<String> s = probablyNameFromFormatting(document);
-      s.ifPresent(s1 -> result.put("probableName", s1));
+      validProbablyName(probablyName)
+          .ifPresent(n -> result.put("probableName", n));
 
-      Optional<String> s1 = validProbablyName(probablyName);
-      s1.ifPresent(n -> result.put("probableName", n));
+      if (!result.has("probableName")) {
+        probablyNameFromFormatting(document)
+            .ifPresent(n -> result.put("probableName", n));
+      }
 
       result.put("firstLine", probablyName);
       return Optional.of(result);
