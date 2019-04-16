@@ -54,10 +54,8 @@ public class PDFBoxResumeParserEngine implements ResumeParserEngine {
 
   @Override
   public Try<JsonNode> parseFile(byte[] fileContent) {
-    try {
+    try (PDDocument pdfDocument = PDDocument.load(fileContent)) {
       ObjectNode resultNode = objectMapper.createObjectNode();
-
-      PDDocument pdfDocument = PDDocument.load(fileContent);
       for (Extractor extractor : extractors) {
         Optional<JsonNode> resultOption = extractor.extract(pdfDocument);
         resultOption.ifPresent(childNode -> {
@@ -73,8 +71,7 @@ public class PDFBoxResumeParserEngine implements ResumeParserEngine {
   }
 
   public Try<byte[]> extractImage(byte[] fileContent) {
-    try {
-      PDDocument pdDocument = PDDocument.load(fileContent);
+    try (PDDocument pdDocument = PDDocument.load(fileContent)) {
       List<RenderedImage> imageList = getImagesFromPDF(pdDocument);
 
       if (imageList.size() <= 0) {

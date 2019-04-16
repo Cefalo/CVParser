@@ -9,10 +9,17 @@ import org.apache.tomcat.util.codec.binary.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Service
 public class ResumeParserService {
 
   private final ResumeParserEngine parserEngine;
+  private static ExecutorService executors = Executors.newFixedThreadPool(2);
 
   public ResumeParserService(@Autowired final ResumeParserEngine pdfBoxResumeParserEngine) {
     this.parserEngine = pdfBoxResumeParserEngine;
@@ -20,9 +27,26 @@ public class ResumeParserService {
 
   public Resume parse(final byte[] fileContent) {
     Resume resume = new Resume();
-    populateAutomaticData(resume, fileContent);
-    populateProfileImage(resume, fileContent);
+    try {
+      List<Callable<Boolean>> dataPopulates = createDataPopulateCallables(resume, fileContent);
+      executors.invokeAll(dataPopulates);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
     return resume;
+  }
+
+  private List<Callable<Boolean>> createDataPopulateCallables(final Resume resume, byte[] fileContent) {
+    List<Callable<Boolean>> dataPopulates = new ArrayList<>();
+    dataPopulates.add(() -> {
+      populateAutomaticData(resume, fileContent);
+      return true;
+    });
+    dataPopulates.add(() -> {
+      populateProfileImage(resume, fileContent);
+      return true;
+    });
+    return dataPopulates;
   }
 
   private void populateAutomaticData(final Resume resume, byte[] fileContent) {
