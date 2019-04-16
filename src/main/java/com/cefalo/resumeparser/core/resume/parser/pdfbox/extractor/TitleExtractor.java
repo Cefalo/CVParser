@@ -38,12 +38,29 @@ public class TitleExtractor implements Extractor {
 
       Optional<String> s = probablyNameFromFormatting(document);
       s.ifPresent(s1 -> result.put("probableName", s1));
+
+      Optional<String> s1 = validProbablyName(probablyName);
+      s1.ifPresent(n -> result.put("probableName", n));
+
       result.put("firstLine", probablyName);
       return Optional.of(result);
     } catch (IOException e) {
       e.printStackTrace();
       return Optional.empty();
     }
+  }
+
+  private Optional<String> validProbablyName(final String probablyName) {
+    if (StringUtils.isNotBlank(probablyName)) {
+      String[] nameTokens = StringUtils.split(probablyName);
+      for (String nameToken : nameTokens) {
+        if (!Character.isUpperCase(nameToken.charAt(0))) {
+          return Optional.empty();
+        }
+      }
+      return Optional.of(probablyName);
+    }
+    return Optional.empty();
   }
 
   private Optional<String> probablyNameFromFormatting(PDDocument pdfDoc) throws IOException {
