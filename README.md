@@ -13,7 +13,7 @@ mvn spring-boot:run
 To parse a resume need to follow this cURL request
 
 ```Shell
-curl -XPOST -F file=@resume.pdf http://localhost:8080/resume/parse
+curl -XPOST -F file=@resume.pdf http://localhost:8080/parse/resume
 ```
 #### Response
 ```
