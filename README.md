@@ -31,3 +31,10 @@ curl -XPOST -F file=@resume.pdf http://localhost:8080/resume/parse
   "image":"image-as-data-uri"
 }
 ```
+
+#### Dockerizing
+
+```bash
+sudo docker build -t resume-parser:1.0 .
+sudo docker run -d -p 8080:8080 resume-parser:1.0
+```
